@@ -1,0 +1,55 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: nbcuniversal
+# "app" enables Serverless Framework Dashboard features and sharing them with other Services.
+app: test2
+# "service" is the name of this project. This will also be added to your AWS resource names.
+service: test2
+
+provider:
+  name: aws
+  runtime: python3.12
+  region: us-east-1
+  stage: dev
+  environment:
+    SLACK_WEBHOOK_URL: https://hooks.slack.com/services/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
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - lambda:InvokeFunction
+      Resource: arn:aws:lambda:us-east-1:975049931675:function:test2-dev-secondLambda
+    - Effect: Allow
+      Action:
+        - logs:CreateLogStream
+        - logs:CreateLogGroup
+        - logs:TagResource
+        - logs:PutLogEvents
+      Resource: 
+        - arn:aws:logs:us-east-1:975049931675:log-group:/aws/lambda/test2-dev*:* 
+        - arn:aws:logs:us-east-1:975049931675:log-group:/aws/lambda/test2-dev*:*:* 
+
+functions:
+
+  hello:
+    handler: handler.hello
+    events:
+      - http:
+          path: /
+          method : get
+    
+  
+  firstLambda:
+    handler: handler.first_lambda
+    events:
+      - http:
+          path: /first
+          method: post
+          # cors: true
+
+  secondLambda:
+    handler: handler.second_lambda
+    events:
+      - http:
+          path: /second
+          method: post
+
+ 
