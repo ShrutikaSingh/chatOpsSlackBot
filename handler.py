@@ -4,8 +4,10 @@ import boto3
 import urllib3
 import os
 from urllib.parse import parse_qs
+
 # from dotenv import load_dotenv
 # load_dotenv()
+
 # Initialize the AWS Lambda client
 client = boto3.client('lambda')
 http = urllib3.PoolManager()
@@ -18,24 +20,19 @@ def hello(event, context):
     return {"statusCode": 200, "body": json.dumps(body)}
 
 def parse_slack_command(message):
-    print("at parse slack commmnad")
     commands = {
         'hello': ['hello', 'hi', 'good morning'],
         'bye': ['bye']
     }
     message_lower = message.lower()
-    print("at message l", message_lower)
     for cmd, keywords in commands.items():
-        print("inside first loop")
         for keyword in keywords:
-            print("keyword", keyword)
             if keyword in message_lower:
                 return cmd
     return None
 
 
 def invoke_lambda(function_name, event):
-    print("at invoke ,functiom name", function_name)
     return client.invoke(
         FunctionName=function_name,
         InvocationType='RequestResponse',
@@ -52,30 +49,23 @@ def respond(message, extra_data=None):
     return response
 
 def first_lambda(event, context):
-    print("here")
-    print(event)
 
     body = parse_qs(event['body'])
-    print("command array", body["command"])
     
     if 'command' not in body:
-        print("command not found")
         return respond("Error: command key not found in event data")
     command_text = body['command'][0]
 
-    print("main comand text", command_text)
+    print("parse command is:", command_text)
     command = parse_slack_command(command_text)
 
     if command == 'hello':
-        print("at hello 1")
         # Trigger second_lambda
         response = invoke_lambda('test2-dev-secondLambda', event) # update this with name in aws lambda console
     elif command == 'bye':
-        print("at bye")
         # Trigger third_lambda
         response = invoke_lambda('test2-dev-thirdLambda', event)
     else:
-        print("unrecognised")
         # Handle unrecognized command
         return respond(f"Unrecognized command: {command}")
 
@@ -98,7 +88,6 @@ def third_lambda(event, context):
 
 def send_to_slack(message):
     slack_webhook_url = os.environ["SLACK_WEBHOOK_URL"]
-    print("mesaage is", message)
     message = {
         'text': message
     }
@@ -112,7 +101,6 @@ def send_to_slack(message):
     )
    
     if response.status != 200:
-        print("hello lamnda error")
         raise Exception(f"Request to Slack returned an error {response.status}, the response is:\n{response.data}, {message2}")
 
     return {
