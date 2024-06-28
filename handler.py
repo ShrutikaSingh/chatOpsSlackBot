@@ -12,6 +12,11 @@ from urllib.parse import parse_qs
 client = boto3.client('lambda')
 http = urllib3.PoolManager()
 
+with open('command_config.json', 'r') as f:
+    config = json.load(f)
+
+commands = config.get('commands', {})
+print(commands,"commands")
 
 def hello(event, context):
     body = {
@@ -20,16 +25,11 @@ def hello(event, context):
     return {"statusCode": 200, "body": json.dumps(body)}
 
 def parse_slack_command(message):
-    commands = {
-        'hello': ['hello', 'hi', 'good morning'],
-        'bye': ['bye']
-    }
     message_lower = message.lower()
-    for cmd, keywords in commands.items():
-        for keyword in keywords:
-            if keyword in message_lower:
-                return cmd
-    return None
+    for cmd, cmd_data in commands.items():
+        if any(keyword in message_lower for keyword in cmd.split()):
+            return cmd, cmd_data
+    return None, None
 
 
 def invoke_lambda(function_name, event):
@@ -56,24 +56,20 @@ def first_lambda(event, context):
         return respond("Error: command key not found in event data")
     command_text = body['command'][0]
 
-    print("parse command is:", command_text)
-    command = parse_slack_command(command_text)
+    print("Parsed command is:", command_text)
+    command, cmd_data = parse_slack_command(command_text)
 
-    if command == 'hello':
-        # Trigger second_lambda
-        response = invoke_lambda('test2-dev-secondLambda', event) # update this with name in aws lambda console
-    elif command == 'bye':
-        # Trigger third_lambda
-        response = invoke_lambda('test2-dev-thirdLambda', event)
+    if command:
+        function_name = cmd_data['function']
+        response = invoke_lambda(function_name, event)
+        return respond(f"Successfullt triggered /{command}!")
     else:
-        # Handle unrecognized command
-        return respond(f"Unrecognized command: {command}")
-
-    return respond(f"First Lambda executed and triggered {command} Lambda!", response)
+        return respond(f"Unrecognized command: /{command_text}")
 
 def second_lambda(event, context):
     print('invoked hello lambda')
-    message = "Second Lambda says Hello"
+    message = commands['hello']['message']
+    #message = "Second Lambda says Hello"
     send_to_slack(message)
     return respond(message)
 
@@ -82,7 +78,8 @@ def second_lambda(event, context):
 # some kind of spilt the message the
 def third_lambda(event, context):
     print('invoked bye lambda')
-    message = "Third Lambda says bye"
+    message = commands['bye']['message']
+    #message = "Third Lambda says bye"
     send_to_slack(message)
     return respond(message)
 

@@ -1,0 +1,13 @@
+{
+    "commands": {
+      "hello": {
+        "function": "test2-dev-secondLambda",
+        "message": "Hello from Second Lambda!"
+      },
+      "bye": {
+        "function": "test2-dev-thirdLambda",
+        "message": "Goodbye from Third Lambda!"
+      }
+    }
+  }
+  
