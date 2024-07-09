@@ -1,16 +1,51 @@
 {
-    "commands": {
-      "hello": {
-        "function": "test2-dev-secondLambda",
-        "message": "Hello from Second Lambda!",
-        "options":["name", "number", "vpc", "subnet"]
+  "services": {
+      "ec2": {
+          "actions": {
+              "create": {
+                  "parameters": {
+                      "instance_type": "t2.micro",
+                      "region": "us-east-1",
+                      "ami": "ami-0abcdef1234567890",
+                      "key_name": "my-key-pair"
+                  }
+              },
+              "start": {
+                  "parameters": {
+                      "instance_id": ""
+                  }
+              },
+              "stop": {
+                  "parameters": {
+                      "instance_id": ""
+                  }
+              },
+              "terminate": {
+                  "parameters": {
+                      "instance_id": ""
+                  }
+              }
+          }
       },
-      
-      "bye": {
-        "function": "test2-dev-thirdLambda",
-        "message": "Goodbye from Third Lambda!",
-        "options": ["to", "region", "additional_message"]
-      }   
-    }
+      "s3": {
+          "actions": {
+              "create": {
+                  "parameters": {
+                      "bucket_name": "my-default-bucket",
+                      "region": "us-east-1"
+                  }
+              }
+          }
+      },
+      "iam": {
+          "actions": {
+              "create_user": {
+                  "parameters": {
+                      "user_name": "",
+                      "permissions": "default"
+                  }
+              }
+          }
+      }
+  }
 }
-  
