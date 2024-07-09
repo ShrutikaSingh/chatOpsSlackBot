@@ -2,12 +2,15 @@
     "commands": {
       "hello": {
         "function": "test2-dev-secondLambda",
-        "message": "Hello from Second Lambda!"
+        "message": "Hello from Second Lambda!",
+        "options":["name", "number", "vpc", "subnet"]
       },
+      
       "bye": {
         "function": "test2-dev-thirdLambda",
-        "message": "Goodbye from Third Lambda!"
-      }
+        "message": "Goodbye from Third Lambda!",
+        "options": ["to", "region", "additional_message"]
+      }   
     }
-  }
+}
   
